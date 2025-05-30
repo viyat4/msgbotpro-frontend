@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 20px; }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4338CA;
+    }
+    pre {
+      background-color: #f7f7f7;
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      border-radius: 4px;
+      overflow: auto;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Registration Test Page</h1>
+  
+  <div class="form-group">
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" value="Test">
+  </div>
+  
+  <div class="form-group">
+    <label for="lastName">Last Name:</label>
+    <input type="text" id="lastName" value="User">
+  </div>
+  
+  <div class="form-group">
+    <label for="email">Email:</label>
+    <input type="email" id="email" value="test-user@example.com">
+  </div>
+  
+  <div class="form-group">
+    <label for="password">Password:</label>
+    <input type="password" id="password" value="TestPassword123">
+  </div>
+  
+  <div class="form-group">
+    <label for="confirmPassword">Confirm Password:</label>
+    <input type="password" id="confirmPassword" value="TestPassword123">
+  </div>
+  
+  <div class="form-group">
+    <label for="phoneNumber">Phone Number (optional):</label>
+    <input type="tel" id="phoneNumber" value="+12125551234" placeholder="+12125551234">
+  </div>
+  
+  <div style="margin-bottom: 20px;">
+    <button id="registerBtn">Test Registration</button>
+    <button id="clearBtn" style="margin-left: 10px; background-color: #CBD5E0; color: #1A202C;">Clear Log</button>
+  </div>
+  
+  <div>
+    <h3>Results:</h3>
+    <pre id="results">Waiting for test...</pre>
+  </div>
+  
+  <script>
+    // Helper for logging
+    function log(message, isError = false) {
+      const results = document.getElementById('results');
+      const entry = document.createElement('div');
+      entry.className = isError ? 'error' : 'success';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      
+      results.appendChild(entry);
+      results.scrollTop = results.scrollHeight;
+    }
+    
+    // Registration test function
+    async function testRegistration() {
+      const payload = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        confirmPassword: document.getElementById('confirmPassword').value,
+        phoneNumber: document.getElementById('phoneNumber').value || undefined
+      };
+      
+      log(`Testing registration with payload: ${JSON.stringify(payload, null, 2)}`);
+      
+      try {
+        // Random email to avoid duplicates
+        payload.email = `test-${Date.now()}@example.com`;
+        document.getElementById('email').value = payload.email;
+        
+        const response = await fetch('http://localhost:4000/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          log(`Registration successful! Response: ${JSON.stringify(data, null, 2)}`);
+        } else {
+          log(`Registration failed with status ${response.status}: ${JSON.stringify(data, null, 2)}`, true);
+        }
+      } catch (error) {
+        log(`Error during registration: ${error.message}`, true);
+      }
+    }
+    
+    // Event listeners
+    document.getElementById('registerBtn').addEventListener('click', testRegistration);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('results').innerHTML = '';
+    });
+    
+    // Generate a random email on page load
+    document.getElementById('email').value = `test-${Date.now()}@example.com`;
+  </script>
+</body>
+</html>
